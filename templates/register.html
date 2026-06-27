@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register - WeatherAI</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icon.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <main class="page-shell auth-shell">
+    <section class="auth-card glass">
+      <p class="eyebrow">WeatherAI Access</p>
+      <h1>Register Account</h1>
+      <p class="subtitle">Akun baru hanya memiliki akses monitoring. Kontrol perangkat tetap khusus admin.</p>
+
+      {% if error_message %}
+      <div class="auth-error">{{ error_message }}</div>
+      {% endif %}
+
+      {% if success_message %}
+      <div class="auth-success">{{ success_message }}</div>
+      {% endif %}
+
+      <form method="post" class="auth-form">
+        <label class="auth-label" for="username">Username</label>
+        <input class="auth-input" id="username" name="username" type="text" placeholder="Masukkan username" required>
+
+        <label class="auth-label" for="password">Password</label>
+        <input class="auth-input" id="password" name="password" type="password" placeholder="Masukkan password" required>
+
+        <label class="auth-label" for="confirm_password">Konfirmasi Password</label>
+        <input class="auth-input" id="confirm_password" name="confirm_password" type="password" placeholder="Ulangi password" required>
+
+        <button class="auth-button" type="submit">Daftar</button>
+      </form>
+
+      <p class="auth-link-row">Sudah punya akun? <a href="{{ url_for('login') }}">Login</a></p>
+    </section>
+  </main>
+</body>
+</html>

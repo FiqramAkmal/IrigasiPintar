@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WeatherAI Error</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icon.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <main class="page-shell">
+    <section class="panel glass" style="margin-top: 32px;">
+      <div class="panel-head">
+        <h3>Dashboard gagal dimuat</h3>
+        <span>WeatherAI</span>
+      </div>
+      <p style="line-height: 1.7; color: var(--muted);">{{ error_message }}</p>
+    </section>
+  </main>
+</body>
+</html>

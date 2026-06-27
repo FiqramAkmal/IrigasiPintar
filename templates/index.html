@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WeatherAI Dashboard</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icon.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <main class="page-shell">
+    <section class="hero glass">
+      <div>
+        <p class="eyebrow">WeatherAI Dashboard</p>
+        <h1>Sensor Status</h1>
+        <p class="subtitle">Monitoring sensor, prediksi penyiraman, dan prakiraan cuaca dalam satu halaman Flask.</p>
+      </div>
+      <div>
+        <img class="logo-head" src="{{ url_for('static', filename='images/logo.png') }}" alt="Ilustrasi login WeatherAI">
+      </div>
+      <div class="hero-meta">
+        <form action="{{ url_for('logout') }}" method="post" class="logout-form">
+          <span class="user-badge">{{ current_user }} [{{ current_role|upper }}]</span>
+          <button type="submit" class="logout-button">Logout</button>
+        </form>
+        <div class="clock" id="clockValue">🕒 {{ generated_at.strftime('%H:%M:%S') }}</div>
+        <div class="date" id="dateValue">{{ generated_at.strftime('%d-%m-%Y') }}</div>
+      </div>
+    </section>
+
+    <section class="grid metrics">
+      <article class="metric-card glass">
+        <span class="metric-label">Temperature Forecast</span>
+        <strong class="metric-value" id="forecastTemperatureValue">{{ forecast_summary.temperature }}°C</strong>
+        <small class="metric-subtext" id="forecastTimeValue">{{ forecast_summary.time_label }}</small>
+      </article>
+      <article class="metric-card glass">
+        <span class="metric-label">Precipitation Forecast</span>
+        <strong class="metric-value" id="forecastPrecipitationValue">{{ forecast_summary.precipitation_probability }}%</strong>
+        <small class="metric-subtext">Probabilitas hujan</small>
+      </article>
+    </section>
+
+    <section class="realtime-panel glass">
+      <div class="panel-head realtime-head">
+        <div>
+          <h3>Realtime Monitoring</h3>
+          <span>Visual sensor telemetry</span>
+        </div>
+        <div class="live-badge {{ sensor_status.state }}" id="liveBadge">
+          <span class="live-dot" id="liveDot"></span>
+          <span id="liveBadgeText">{{ sensor_status.label }}</span>
+        </div>
+      </div>
+
+      <div class="realtime-grid">
+        <article class="sensor-visual-card sensor-temp">
+          <div class="sensor-visual-top">
+            <div>
+              <p class="sensor-kicker">Temperature</p>
+              <h4>Ambient Air</h4>
+            </div>
+            <div class="sensor-icon">🌡️</div>
+          </div>
+          <div class="sensor-gauge" id="temperatureGauge" style="--gauge-value: {{ ((sensor.temperature|float + 10) / 50) if sensor.temperature is defined else 0.42 }};">
+            <div class="sensor-gauge-inner">
+              <strong id="temperatureGaugeValue">{{ sensor.temperature }}°C</strong>
+              <span>Realtime</span>
+            </div>
+          </div>
+          <div class="sensor-meta">
+            <span class="sensor-pill">Ideal 22–30°C</span>
+            <span id="temperatureInsight">Stabil untuk monitoring.</span>
+          </div>
+        </article>
+
+        <article class="sensor-visual-card sensor-humidity">
+          <div class="sensor-visual-top">
+            <div>
+              <p class="sensor-kicker">Humidity</p>
+              <h4>Air Moisture</h4>
+            </div>
+            <div class="sensor-icon">💧</div>
+          </div>
+          <div class="sensor-wave-wrap">
+            <div class="sensor-wave-fill" id="humidityFill" style="height: {{ sensor.humidity|float }}%;"></div>
+            <div class="sensor-wave-content">
+              <strong id="humidityGaugeValue">{{ sensor.humidity }}%</strong>
+              <span>Kelembapan udara</span>
+            </div>
+          </div>
+          <div class="sensor-meta">
+            <span class="sensor-pill">Ideal 45–75%</span>
+            <span id="humidityInsight">Kelembapan udara terjaga.</span>
+          </div>
+        </article>
+
+        <article class="sensor-visual-card sensor-soil">
+          <div class="sensor-visual-top">
+            <div>
+              <p class="sensor-kicker">Soil Moisture</p>
+              <h4>Root Zone</h4>
+            </div>
+            <div class="sensor-icon">🌱</div>
+          </div>
+          <div class="soil-bars">
+            <div class="soil-bar-track">
+              <div class="soil-bar-fill" id="soilBarFill" style="width: {{ sensor.soil|float }}%;"></div>
+            </div>
+            <div class="soil-reading">
+              <strong id="soilGaugeValue">{{ sensor.soil }}%</strong>
+              <span id="soilInsight">Kondisi tanah terpantau.</span>
+            </div>
+          </div>
+          <div class="soil-scale">
+            <span>Kering</span>
+            <span>Lembap</span>
+            <span>Basah</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="vision-panel glass">
+      <div class="panel-head">
+        <div>
+          <h3>Vision Monitor</h3>
+          <span>MJPEG stream dan deteksi penyakit dari Raspberry Pi</span>
+        </div>
+      </div>
+      <div class="vision-grid">
+        <article class="vision-card">
+          <div class="vision-card-head">
+            <div>
+              <p class="sensor-kicker">Live Monitor</p>
+              <h4>{{ pi_stream_label }}</h4>
+            </div>
+            <span class="vision-status offline" id="streamStatusBadge">Offline</span>
+          </div>
+          <div class="vision-frame-wrap">
+            {% if pi_mjpeg_url %}
+            <img class="vision-frame" id="streamFrame" src="{{ pi_mjpeg_url }}" alt="Live MJPEG stream dari Raspberry Pi">
+            {% else %}
+            <div class="vision-placeholder">URL MJPEG belum dikonfigurasi di `.env`.</div>
+            {% endif %}
+          </div>
+        </article>
+
+        <article class="vision-card">
+          <div class="vision-card-head">
+            <div>
+              <p class="sensor-kicker">Disease Detection</p>
+              <h4>{{ pi_detection_label }}</h4>
+            </div>
+            <span class="vision-status offline" id="detectionStatusBadge">Offline</span>
+          </div>
+          <div class="vision-frame-wrap detection-wrap">
+            {% if pi_detection_image_url %}
+            <img class="vision-frame" id="detectionFrame" src="{{ pi_detection_image_url }}" alt="Snapshot hasil deteksi penyakit tanaman dari Raspberry Pi">
+            {% else %}
+            <div class="vision-placeholder">URL snapshot deteksi belum dikonfigurasi di `.env`.</div>
+            {% endif %}
+          </div>
+          <p class="vision-help">Panel ini menampilkan snapshot terbaru dan telemetry deteksi penyakit dari Raspberry Pi.</p>
+          <div class="disease-meta-grid">
+            <div class="disease-meta-item">
+              <span>Kondisi</span>
+              <strong id="diseaseConditionValue">{{ disease.kondisi_daun }}</strong>
+            </div>
+            <div class="disease-meta-item">
+              <span>Keyakinan</span>
+              <strong id="diseaseConfidenceValue">{{ disease.tingkat_keyakinan }}%</strong>
+            </div>
+            <div class="disease-meta-item">
+              <span>Status</span>
+              <strong id="diseaseStatusValue">{{ disease.status_deteksi }}</strong>
+            </div>
+            <div class="disease-meta-item">
+              <span>Detected At</span>
+              <strong id="diseaseDetectedAtValue">{{ disease.detected_at }}</strong>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="status-banner glass {{ watering.variant }}" id="statusBanner">
+      <div>
+        <p class="status-label">Status Penyiraman</p>
+        <h2 id="wateringMessage">{{ watering.message }}</h2>
+      </div>
+      <div class="status-side">
+        <span>Prediksi Model: <strong id="predictionValue">{{ prediction }}</strong></span>
+        <span>MQTT Command: <strong id="commandValue">{{ watering.command|upper }}</strong></span>
+        <span>Akses: <strong>{{ current_role|upper }}</strong></span>
+      </div>
+    </section>
+
+    <section class="control-panel glass" id="controlPanel">
+      <div class="panel-head">
+        <div>
+          <h3>Control Center</h3>
+          <span>Admin only · mode auto/manual</span>
+        </div>
+        <div class="control-state" id="controlStateLabel">{{ control_state.mode|upper }}</div>
+      </div>
+      <div class="control-grid">
+        <div class="control-mode-card">
+          <p class="control-label">Mode Kontrol</p>
+          <div class="control-actions">
+            <button class="control-button" id="modeAutoButton" type="button">Auto</button>
+            <button class="control-button" id="modeManualButton" type="button">Manual</button>
+          </div>
+          <p class="control-help">Auto mengikuti keputusan program. Manual membuka kontrol ON/OFF.</p>
+        </div>
+        <div class="control-mode-card">
+          <p class="control-label">Manual Command</p>
+          <div class="control-actions">
+            <button class="control-button control-on" id="manualOnButton" type="button">Pump ON</button>
+            <button class="control-button control-off" id="manualOffButton" type="button">Pump OFF</button>
+          </div>
+          <p class="control-help" id="controlHelpText">Ubah ke mode manual dulu untuk mengirim command langsung.</p>
+        </div>
+        <div class="control-mode-card control-summary-card">
+          <p class="control-label">Ringkasan</p>
+          <div class="control-summary-row"><span>Role</span><strong id="controlRoleLabel">{{ current_role|upper }}</strong></div>
+          <div class="control-summary-row"><span>Manual default</span><strong id="manualDefaultLabel">{{ control_state.manual_command|upper }}</strong></div>
+          <div class="control-summary-row"><span>Effective command</span><strong id="effectiveCommandLabel">{{ control_state.last_effective_command|upper }}</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid charts">
+      <article class="panel glass">
+        <div class="panel-head">
+          <h3>Temperature Forecast</h3>
+          <span>Per jam</span>
+        </div>
+        <canvas id="temperatureChart"></canvas>
+      </article>
+      <article class="panel glass">
+        <div class="panel-head">
+          <h3>Precipitation Probability</h3>
+          <span>Per jam</span>
+        </div>
+        <canvas id="rainChart"></canvas>
+      </article>
+    </section>
+
+    <section class="panel glass table-panel">
+      <div class="panel-head">
+        <h3>Detail Data Cuaca</h3>
+        <span>Open-Meteo</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Jam</th>
+              <th>Temp (°C)</th>
+              <th>Humidity (%)</th>
+              <th>Rain Prob (%)</th>
+              <th>Rain</th>
+            </tr>
+          </thead>
+          <tbody id="weatherTableBody">
+            {% for row in weather_rows %}
+            <tr>
+              <td>{{ row.date_label }}</td>
+              <td>{{ row.temperature_2m }}</td>
+              <td>{{ row.humidity }}</td>
+              <td>{{ row.precipitation_probability }}</td>
+              <td>{{ row.precipitation }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel glass export-panel">
+      <div class="panel-head">
+        <div>
+          <h3>Export Logs</h3>
+          <span>Unduh log sensor, prediksi, dan deteksi penyakit</span>
+        </div>
+      </div>
+      {% if current_role == 'admin' %}
+      <div class="export-actions">
+        <a class="export-button" href="{{ url_for('export_sensor_logs_csv') }}">Export Sensor Logs</a>
+        <a class="export-button" href="{{ url_for('export_prediction_logs_csv') }}">Export Prediction Logs</a>
+        <a class="export-button" href="{{ url_for('export_disease_logs_csv') }}">Export Disease Logs</a>
+      </div>
+      {% else %}
+      <p class="export-note">Hanya admin yang dapat mengunduh log database.</p>
+      {% endif %}
+    </section>
+  </main>
+
+  <script>
+    window.dashboardData = {
+      apiUrl: {{ url_for('api_status') | tojson }},
+      generatedAt: {{ generated_at.isoformat() | tojson }},
+      sensor: {{ sensor | tojson }},
+      forecastSummary: {{ forecast_summary | tojson }},
+      prediction: {{ prediction | tojson }},
+      currentRole: {{ current_role | tojson }},
+      disease: {{ disease | tojson }},
+      sensorStatus: {{ sensor_status | tojson }},
+      controlState: {{ control_state | tojson }},
+      refreshIntervalMs: {{ ui_refresh_interval_ms | tojson }},
+      piMjpegUrl: {{ pi_mjpeg_url | tojson }},
+      piDetectionImageUrl: {{ pi_detection_image_url | tojson }},
+      piSnapshotRefreshMs: {{ pi_snapshot_refresh_ms | tojson }},
+      watering: {{ watering | tojson }},
+      weatherRows: {{ weather_rows | tojson }},
+      labels: {{ weather_labels | tojson }},
+      temperatureSeries: {{ temperature_series | tojson }},
+      precipitationProbabilitySeries: {{ precipitation_probability_series | tojson }}
+    };
+  </script>
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

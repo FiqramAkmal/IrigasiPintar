@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - WeatherAI</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icon.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <main class="page-shell auth-shell">
+    <section class="auth-card glass">
+      <p class="eyebrow">WeatherAI Secure Access</p>
+      <h1>Login Dashboard</h1>
+      <img class="auth-illustration" src="{{ url_for('static', filename='images/logo.png') }}" alt="Ilustrasi login WeatherAI">
+      <p class="subtitle">Masuk untuk melihat dashboard sensor, prediksi penyiraman, dan data cuaca live.</p>
+
+      {% if error_message %}
+      <div class="auth-error">{{ error_message }}</div>
+      {% endif %}
+
+      <form method="post" class="auth-form">
+        <input type="hidden" name="next" value="{{ next_url }}">
+        <label class="auth-label" for="username">Username</label>
+        <input class="auth-input" id="username" name="username" type="text" placeholder="Masukkan username" required>
+
+        <label class="auth-label" for="password">Password</label>
+        <input class="auth-input" id="password" name="password" type="password" placeholder="Masukkan password" required>
+
+        <button class="auth-button" type="submit">Masuk</button>
+      </form>
+
+      <p class="auth-link-row">Belum punya akun? <a href="{{ url_for('register') }}">Register</a></p>
+    </section>
+  </main>
+</body>
+</html>

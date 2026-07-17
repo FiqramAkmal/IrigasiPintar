@@ -31,12 +31,12 @@ latest_data = {}
 mqtt_client = None
 last_message_at = None
 
-BROKER = os.environ.get("MQTT_BROKER", "localhost")
-PORT = int(os.environ.get("MQTT_PORT", "8883"))
-USERNAME = os.environ.get("MQTT_USERNAME", "")
-PASSWORD = os.environ.get("MQTT_PASSWORD", "")
-TOPIC = os.environ.get("MQTT_TOPIC", "SIC7/data")
-DISEASE_TOPIC = os.environ.get("MQTT_DISEASE_TOPIC", "WTH/disease")
+BROKER = os.environ.get("MQTT_BROKER")
+PORT = int(os.environ.get("MQTT_PORT")
+USERNAME = os.environ.get("MQTT_USERNAME")
+PASSWORD = os.environ.get("MQTT_PASSWORD")
+TOPIC = os.environ.get("MQTT_TOPIC")
+DISEASE_TOPIC = os.environ.get("MQTT_DISEASE_TOPIC")
 
 
 def on_connect(client, userdata, flags, rc):

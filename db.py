@@ -8,11 +8,11 @@ import pymysql
 from pymysql.cursors import DictCursor
 
 DB_CONFIG = {
-    "host": os.environ.get("DB_HOST", "127.0.0.1"),
-    "port": int(os.environ.get("DB_PORT", "3306")),
+    "host": os.environ.get("DB_HOST"),
+    "port": int(os.environ.get("DB_PORT")),
     "user": os.environ.get("DB_USER", "weatherai_app"),
-    "password": os.environ.get("DB_PASSWORD", ""),
-    "database": os.environ.get("DB_NAME", "weatherai"),
+    "password": os.environ.get("DB_PASSWORD"),
+    "database": os.environ.get("DB_NAME"),
     "cursorclass": DictCursor,
     "autocommit": True,
 }
